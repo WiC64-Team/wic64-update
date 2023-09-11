@@ -214,7 +214,7 @@ return_to_portal:
     +fill install_response, $00, $ff
 
 .execute_install_request
-    +wic64_execute install_request, install_response
+    +wic64_execute install_request, install_response, $01
     bcs .wait_for_wic64_to_reboot
 
 .show_install_request_error
@@ -231,11 +231,12 @@ return_to_portal:
     +print installing_text
     +print_version .version
 
--   jsr dot
-    +wic64_execute ping_request, ping_response
-    bcs -
+-   +wic64_execute ping_request, ping_response, $01
+    bcc +
+    jsr dot
+    jmp -
 
-    +print success_text
++   +print success_text
 
 .confirm_newly_installed_version:
     +wic64_execute installed_version_request, installed_version
