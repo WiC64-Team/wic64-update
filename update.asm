@@ -152,6 +152,11 @@ continue_or_quit_text:
 ; ---------------------------------------------------------------------------
 
 return_to_portal:
+    ; clear keyboard buffer
+    ; TODO: should be in portal startup
+    lda #$00
+    sta $c6
+
     +wic64_return_to_portal
     rts
 
@@ -333,7 +338,9 @@ get_installed_version:
     +print_error_and_jmp timeout_error_text, main
 
 +   +print installed_text
+    jsr cyan
     +print_version installed_version
+    jsr green
 
     lda installed_version+3
     beq +
@@ -343,7 +350,7 @@ get_installed_version:
 
 +   +print stable_tag
 
-++   +paragraph
+++  +paragraph
 
 get_remote_versions:
     lda #'v'
@@ -361,11 +368,12 @@ get_current_stable_version:
     +print_error_and_jmp timeout_error_text, main
 
 +   lda current_stable_version
-    beq get_previous_stable_version
-
-    +compare_versions current_stable_version, installed_version
-    bcs +
+    bne +
     jsr grey
+
++   +compare_versions current_stable_version, installed_version
+    bcs +
+    jsr cyan
 
 +   +print current_stable_text
     +print_version current_stable_version
@@ -381,11 +389,12 @@ get_previous_stable_version:
     +print_error_and_jmp timeout_error_text, main
 
 +   lda previous_stable_version
-    beq get_current_unstable_version
-
-    +compare_versions previous_stable_version, installed_version
-    bcs +
+    bne +
     jsr grey
+
++   +compare_versions previous_stable_version, installed_version
+    bcs +
+    jsr cyan
 
 +   +print previous_stable_text
     +print_version previous_stable_version
@@ -404,11 +413,12 @@ get_current_unstable_version:
     +print_error_and_jmp timeout_error_text, main
 
 +   lda current_unstable_version
-    beq get_previous_unstable_version
-
-    +compare_versions current_unstable_version, installed_version
-    bcs +
+    bne +
     jsr grey
+
++   +compare_versions current_unstable_version, installed_version
+    bcs +
+    jsr cyan
 
 +   +print current_unstable_text
     +print_version current_unstable_version
@@ -424,11 +434,12 @@ get_previous_unstable_version:
     +print_error_and_jmp timeout_error_text, main
 
 +   lda previous_unstable_version
-    beq prompt
-
-    +compare_versions previous_unstable_version, installed_version
-    bcs +
+    bne +
     jsr grey
+
++   +compare_versions previous_unstable_version, installed_version
+    bcs +
+    jsr cyan
 
 +   +print previous_unstable_text
     +print_version previous_unstable_version
@@ -513,7 +524,7 @@ stable_tag:
 unstable_tag:
 !text " (UNSTABLE)", $00
 
-none_text: !text "none", $00
+none_text: !text "NONE", $00
 
 prompt_text:
 !text "=> sELECT VERSION TO INSTALL", $0d
