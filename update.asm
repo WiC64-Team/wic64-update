@@ -22,11 +22,27 @@ wic64_include_return_to_portal = 1
 
 ; ---------------------------------------------------------------------------
 
-test_menu_code_loaded:
+test_menu_code_loaded: !zone {
     lda draw_menu_header
     cmp #$4c
+    bne .not_loaded
+
+    lda draw_menu_header+1
+    cmp #$46
+    bne .not_loaded
+
+    lda draw_menu_header+2
+    cmp #$ce
+    bne .not_loaded
+
+.loaded
+    clc
     rts
 
+.not_loaded
+    sec
+    rts
+}
 ; ---------------------------------------------------------------------------
 
 !macro print_version .addr {
@@ -278,7 +294,7 @@ main:
     jsr lowercase
 
     jsr test_menu_code_loaded
-    beq +
+    bcc +
 
     +print title_text
     jmp ++
