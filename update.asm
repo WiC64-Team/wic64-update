@@ -619,7 +619,7 @@ remote_request:
 remote_request_header: !byte "W"
 remote_request_size: !byte <remote_request_length, >remote_request_length
 remote_request_cmd: !byte $01
-remote_request_url: !text "http://192.168.8.176:8080/update/update.php?q="
+remote_request_url: !text "http://www.henning-liebenau.de/update/update.php?q="
 remote_request_query: !text "xxx"
 remote_request_url_end:
 
