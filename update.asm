@@ -1,5 +1,7 @@
 ; ---------------------------------------------------------------------------
 
+; TODO: Handle HTTP failures when fetching version information
+
 !addr zp1 = $22
 !addr zp2 = $50
 
@@ -219,12 +221,40 @@ return_to_portal:
     +fill install_response, $00, $ff
 
 .execute_install_request
-    +wic64_execute install_request, install_response, $01
-    bcs .wait_for_wic64_to_reboot
+    +print installing_text
+    +print_version .version
+    +print elipsis_text
 
-.show_install_request_error
+    jsr save_cursor_pos
+    jsr start_of_line
+    jsr spinner_start
+
+    +wic64_execute install_request, install_response, $40
+    bcc +
+    +paragraph
+    +print_error_and_jmp timeout_error_text, main
+
++   jsr spinner_stop
+
+    lda #$00
+    sta install_successful
+
++   lda install_response
+    cmp #'0'
+    beq +
+    lda #$01
+    sta install_successful
+
++   lda install_successful
+    beq .install_success
+
+.install_failure:
     jsr red
-    +print_ascii install_response
+    lda #'x'
+    jsr chrout
+    jsr restore_cursor_pos
+    +paragraph
+    +print_ascii install_response+2
     jsr green
 
     +paragraph
@@ -232,46 +262,87 @@ return_to_portal:
     jsr continue_or_quit
     jmp main
 
-.wait_for_wic64_to_reboot
-    +print installing_text
-    +print_version .version
+.install_success:
+    lda #$ba
+    jsr chrout
+    jsr restore_cursor_pos
+    +print_ascii install_response+2
 
--   +wic64_execute ping_request, ping_response, $01
-    bcc +
-    jsr dot
-    jmp -
+.reboot:
+    +newline
+    +print rebooting_text
+    +print elipsis_text
 
-+   +print success_text
+    jsr save_cursor_pos
+    jsr start_of_line
+    jsr spinner_start
 
-.confirm_newly_installed_version:
-    +wic64_execute installed_version_request, installed_version
+    ; only send reboot request, then expect single handshake...
+
+    lda #$10
+    sta wic64_timeout
+    +wic64_set_timeout $10
+    +wic64_initialize
+    +wic64_send_header reboot_request
+    +wic64_wait_for_handshake
+    +wic64_finalize
+
+    lda #$01
+    jsr delay
+
+    jsr spinner_stop
+    lda #$ba
+    jsr chrout
+    jsr restore_cursor_pos
+    +print ok_text
+
+    +newline
+    +print installed_version_text
+
+    jsr save_cursor_pos
+    jsr start_of_line
+    jsr spinner_start
+
+    +fill installed_version_string_response, $00, $40
+    +wic64_execute installed_version_string_request, installed_version_string_response
     bcc +
     +print_error_and_jmp timeout_error_text, main
 
-+   jsr cyan
-    +print install_successful_text
-    +print_version installed_version
-    +paragraph
++   jsr spinner_stop
+    lda #$ba
+    jsr chrout
+    jsr restore_cursor_pos
 
-    jsr green
+    +print installed_version_string_response
+
+    +paragraph
     +print continue_or_quit_text
     jsr continue_or_quit
-
     jmp main
-
 .done
 }
+
+install_successful: !byte $01
 
 current_stable_url_query: !text "csu"
 previous_stable_url_query: !text "psu"
 current_unstable_url_query: !text "cuu"
 previous_unstable_url_query: !text "puu"
 
-installing_text: !text "iNSTALLING VERSION ", $00
-success_text: !text "ok", $0d, $0d, $00
+installing_text:
+!text "  iNSTALLING VERSION ", $00
 
-install_successful_text:
-!text "iNSTALLED VERSION ", $00
+rebooting_text:
+!text "  bOOTING INSTALLED FIRMWARE", $00
+
+elipsis_text:
+!text "... ", $00
+
+ok_text:
+!text "ok", $00
+
+installed_version_text:
+!text "  cONFIRMING VERSION... ", $00
 
 warning_installed_prefix:
 !text "vERSION ", $00
@@ -287,6 +358,8 @@ unstable_hint_text:
 
 install_unstable_prompt:
 !text "iNSTALL UNSTABLE VERSION? (y/n)", $0d, $0d, $00
+
+reboot_request: !byte "W", $04, $00, $29
 
 ; ---------------------------------------------------------------------------
 
@@ -546,7 +619,7 @@ remote_request:
 remote_request_header: !byte "W"
 remote_request_size: !byte <remote_request_length, >remote_request_length
 remote_request_cmd: !byte $01
-remote_request_url: !text "http://www.henning-liebenau.de/update/update.php?q="
+remote_request_url: !text "http://192.168.8.176:8080/update/update.php?q="
 remote_request_query: !text "xxx"
 remote_request_url_end:
 

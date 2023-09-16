@@ -1,6 +1,8 @@
 !zone util {
 
 !addr chrout = $ffd2
+current_line = $d1
+current_pos = $24
 
 !macro pointer .pointer, .address {
     ldx #<.address
@@ -19,8 +21,8 @@
 
     +decw rts_to_addr
 
-    pla
-    pla
+    ldx #$ff
+    txs
     lda rts_to_addr+1
     pha
     lda rts_to_addr
@@ -111,6 +113,33 @@ clrhome !zone clrhome {
     ldx #.y
     clc
     jsr $fff0
+}
+
+start_of_line:
+    sec
+    jsr $fff0
+    ldy #$00
+    clc
+    jsr $fff0
+    rts
+
+!zone safe_restore_cursor_pos {
+save_cursor_pos:
+    sec
+    jsr $fff0
+    stx .x
+    sty .y
+    rts
+
+restore_cursor_pos:
+    ldx .x
+    ldy .y
+    clc
+    jsr $fff0
+    rts
+
+.x: !byte $00
+.y: !byte $00
 }
 
 ; ---------------------------------------------------------------------------
@@ -360,6 +389,136 @@ yellow:
     rts
 
 ; ---------------------------------------------------------------------------
+
+!zone spinner {
+.spinner_install:
+sei
+    ; stop all cia interrupts
+    lda #$7f
+    sta $dc0d
+    sta $dd0d
+
+    ; clear cia interrupt flags
+    lda $dc0d
+    lda $dd0d
+
+    ; save previous irq vector
+    lda $0314
+    sta .previous_irq
+    lda $0315
+    sta .previous_irq+1
+
+    ; setup irq vector
+    lda #<spinner_spin
+    sta $0314
+    lda #>spinner_spin
+    sta $0315
+
+    ; setup rasterline $018
+    lda #$18
+    sta $d012
+
+    lda $d011
+    and #$7f
+    sta $d011
+
+    ; enable raster irq
+    lda $d01a
+    ora #$01
+    sta $d01a
+    rts
+
+spinner_spin:
+    inc .spinner_frames
+    lda #$08
+    bit .spinner_frames
+    beq +
+
+    lda .spinner_index
+    and #$03
+    tax
+    lda .spinner_sequence,x
+    ldy #$00
+    sta (current_pos),y
+
+    inc .spinner_index
+
+    lda #$00
+    sta .spinner_frames
+
++   lda #$ff
+    sta $d019
+    jmp $ea81
+
+spinner_start:
+    jsr .spinner_install
+
+    ; get current screen memory position
+    sec
+    jsr $fff0
+    lda $00
+    tya
+    clc
+    adc current_line
+    sta current_pos
+    lda #$00
+    adc current_line+1
+    sta current_pos+1
+
+    inc wic64_dont_disable_irqs
+    cli
+    rts
+
+spinner_stop:
+    lda #$20
+    ldy #$00
+    sta (current_pos),y
+
+    dec wic64_dont_disable_irqs
+
+    sei
+
+    ; restore previous irq vector
+    lda .previous_irq
+    sta $0314
+    lda .previous_irq+1
+    sta $0315
+
+    ; disable raster irq
+    lda $d01a
+    and #!$01
+    sta $d01a
+
+    cli
+    rts
+
+.spinner_index: !byte $00
+.spinner_sequence: !byte $7b, $7e, $7c ,$6c
+.spinner_frames: !word $0000
+.previous_irq
+}
+
+delay: !zone {
+.times
+    lda #$00
+    sta .counters+0
+    sta .counters+1
+    lda #$01
+    sta .counters+2
+
+-   dec .counters+0
+    bne -
+    dec .counters+1
+    bne -
+    dec .counters+2
+    bne -
+
+    dey
+    bne .times
+    rts
+
+.counters: !byte $00, $00, $00
+}
 
 ascii2petscii:
 !for i, 0, 255 { !byte i }
