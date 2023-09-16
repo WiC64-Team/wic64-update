@@ -287,7 +287,7 @@ return_to_portal:
     +wic64_wait_for_handshake
     +wic64_finalize
 
-    lda #$01
+    lda #$10
     jsr delay
 
     jsr spinner_stop
