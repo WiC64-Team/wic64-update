@@ -231,6 +231,8 @@ return_to_portal:
 
     +wic64_execute install_request, install_response, $40
     bcc +
+
+    jsr spinner_stop
     +paragraph
     +print_error_and_jmp timeout_error_text, main
 
@@ -287,7 +289,7 @@ return_to_portal:
     +wic64_wait_for_handshake
     +wic64_finalize
 
-    lda #$10
+    lda #$20
     jsr delay
 
     jsr spinner_stop
@@ -303,9 +305,10 @@ return_to_portal:
     jsr start_of_line
     jsr spinner_start
 
-    +fill installed_version_string_response, $00, $40
-    +wic64_execute installed_version_string_request, installed_version_string_response
+    +wic64_execute installed_version_request, installed_version
     bcc +
+
+    jsr spinner_stop
     +print_error_and_jmp timeout_error_text, main
 
 +   jsr spinner_stop
@@ -313,7 +316,7 @@ return_to_portal:
     jsr chrout
     jsr restore_cursor_pos
 
-    +print installed_version_string_response
+    +print_version installed_version
 
     +paragraph
     +print continue_or_quit_text
@@ -619,7 +622,7 @@ remote_request:
 remote_request_header: !byte "W"
 remote_request_size: !byte <remote_request_length, >remote_request_length
 remote_request_cmd: !byte $01
-remote_request_url: !text "http://www.henning-liebenau.de/update/update.php?q="
+remote_request_url: !text "https://wic64.net/update/update.php?q="
 remote_request_query: !text "xxx"
 remote_request_url_end:
 
