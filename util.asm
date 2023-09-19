@@ -498,28 +498,6 @@ spinner_stop:
 .previous_irq
 }
 
-delay: !zone {
-.times
-    lda #$00
-    sta .counters+0
-    sta .counters+1
-    lda #$01
-    sta .counters+2
-
--   dec .counters+0
-    bne -
-    dec .counters+1
-    bne -
-    dec .counters+2
-    bne -
-
-    dey
-    bne .times
-    rts
-
-.counters: !byte $00, $00, $00
-}
-
 ascii2petscii:
 !for i, 0, 255 { !byte i }
 
