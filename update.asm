@@ -360,7 +360,7 @@ unstable_hint_text:
 install_unstable_prompt:
 !text "iNSTALL UNSTABLE VERSION? (y/n)", $0d, $0d, $00
 
-reboot_request: !byte "W", $04, $00, $29
+reboot_request: !byte "R", $29, $00, $00
 
 ; ---------------------------------------------------------------------------
 
@@ -608,24 +608,24 @@ timeout_error_text:
 !text "rEQUEST TIMEOUT", $0d, $0d, $00
 
 installed_version_request:
-!byte "W", $04, $00, $26
+!byte "R", $26, $00, $00
 
 installed_version_string_request:
-!byte "W", $04, $00, $00
+!byte "R", $00, $00, $00
 
 installed_version_string_response:
 !fill 64, 0
 
 remote_request:
-remote_request_header: !byte "W"
-remote_request_size: !byte <remote_request_length, >remote_request_length
+remote_request_header: !byte "R"
 remote_request_cmd: !byte $01
+remote_request_size: !byte <remote_request_length, >remote_request_length
 remote_request_url: !text "https://wic64.net/update/update.php?q="
 remote_request_query: !text "xxx"
 remote_request_url_end:
 
 remote_request_url_length = remote_request_url_end - remote_request_url
-remote_request_length = remote_request_url_length + 4
+remote_request_length = remote_request_url_length
 
 installed_version:
 !fill 4
@@ -655,13 +655,13 @@ previous_unstable_version_installed:
 !byte $01
 
 install_request:
-install_request_header: !byte "W"
-install_request_size: !byte $00, $00
+install_request_header: !byte "R"
 install_request_cmd: !byte $27
+install_request_size: !word $0000
 install_request_url: !fill 255
 
 install_response: !fill 255
 
-ping_request: !byte "W", $08, $00, $fe
+ping_request: !byte "R", $fe, $04, $00
 ping_data: !text "ping"
 ping_response: !byte $00, $00, $00, $00
