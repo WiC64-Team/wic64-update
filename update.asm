@@ -219,7 +219,6 @@ return_to_portal:
     +strlen install_request_url
     stx install_request_size
     +add_four_to install_request_size
-    +fill install_response, $00, $ff
 
 .execute_install_request
     +print installing_text
@@ -386,8 +385,6 @@ main:
 ++  jsr reverse_off
 
 bail_on_legacy_firmware:
-    +fill installed_version_string_response, $00, $40
-
     +wic64_execute installed_version_string_request, installed_version_string_response
     bcc +
     +print_error_and_jmp timeout_error_text, main
