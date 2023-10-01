@@ -1,7 +1,5 @@
 ; ---------------------------------------------------------------------------
 
-; TODO: Handle HTTP failures when fetching version information
-
 !addr zp1 = $22
 !addr zp2 = $50
 
@@ -141,6 +139,21 @@ continue_or_quit_text:
 
 ; ---------------------------------------------------------------------------
 
+!macro check_for_server_error {
+    clc
+    lda wic64_response_size+1
+    bne .done
+
+    lda #$02
+    cmp wic64_response_size
+    bcc .done
+
+    sec
+.done
+}
+
+; ---------------------------------------------------------------------------
+
 !macro print_error_and_jmp .message, .addr {
     jsr red
     +print .message
@@ -161,8 +174,12 @@ return_to_portal:
     sta $c6
 
     +wic64_return_to_portal
+    jsr red
+    +print .portal_error_text
+    +print_error_and_jmp server_error_text, main
     rts
 
+.portal_error_text: !pet $0d, "Could not return to portal:", $0d, $0d, $00
 ; ---------------------------------------------------------------------------
 
 !macro install .version, .query {
@@ -212,8 +229,13 @@ return_to_portal:
 
 .execute_url_query
     +wic64_execute remote_request, install_request_url
-    bcc .prepare_install_request
+    bcc .check_for_server_error
     +print_error_and_jmp timeout_error_text, main
+
+.check_for_server_error
+   +check_for_server_error
+    bcc .prepare_install_request
+    +print_error_and_jmp server_error_text, main
 
 .prepare_install_request
     +strlen install_request_url
@@ -437,6 +459,10 @@ get_current_stable_version:
     bcc +
     +print_error_and_jmp timeout_error_text, main
 
++   +check_for_server_error
+    bcc +
+    +print_error_and_jmp server_error_text, main
+
 +   lda current_stable_version
     bne +
     jsr grey
@@ -457,6 +483,10 @@ get_previous_stable_version:
     +wic64_execute remote_request, previous_stable_version
     bcc +
     +print_error_and_jmp timeout_error_text, main
+
++   +check_for_server_error
+    bcc +
+    +print_error_and_jmp server_error_text, main
 
 +   lda previous_stable_version
     bne +
@@ -482,6 +512,10 @@ get_current_unstable_version:
     bcc +
     +print_error_and_jmp timeout_error_text, main
 
++   +check_for_server_error
+    bcc +
+    +print_error_and_jmp server_error_text, main
+
 +   lda current_unstable_version
     bne +
     jsr grey
@@ -502,6 +536,10 @@ get_previous_unstable_version:
     +wic64_execute remote_request, previous_unstable_version
     bcc +
     +print_error_and_jmp timeout_error_text, main
+
++   +check_for_server_error
+    bcc +
+    +print_error_and_jmp server_error_text, main
 
 +   lda previous_unstable_version
     bne +
@@ -601,7 +639,10 @@ prompt_text:
 !pet $0d, $00
 
 timeout_error_text:
-!pet "Request timeout", $0d, $0d, $00
+!pet "Request timed out", $0d, $0d, $00
+
+server_error_text:
+!pet "HTTP failed: no network or server error", $0d, $0d, $00
 
 installed_version_request:
 !byte "R", $26, $00, $00
