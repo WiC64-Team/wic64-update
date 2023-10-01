@@ -307,7 +307,7 @@ print_dec !zone print_dec {
 
 .value: !byte $00
 .nonzero_digit_printed: !byte $01
-.digits: !text "0123456789"
+.digits: !pet "0123456789"
 }
 
 ; ---------------------------------------------------------------------------

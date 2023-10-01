@@ -137,7 +137,7 @@ continue_or_quit:
 ++  rts
 
 continue_or_quit_text:
-!text "=> pRESS ANY KEY TO CONTINUE", $0d, $00
+!pet "=> Press any key to continue", $0d, $00
 
 ; ---------------------------------------------------------------------------
 
@@ -330,34 +330,34 @@ current_unstable_url_query: !text "cuu"
 previous_unstable_url_query: !text "puu"
 
 installing_text:
-!text "  iNSTALLING VERSION ", $00
+!pet "  Installing version ", $00
 
 rebooting_text:
-!text "  bOOTING INSTALLED FIRMWARE", $00
+!pet "  Booting installed firmware", $00
 
 elipsis_text:
-!text "... ", $00
+!pet "... ", $00
 
 ok_text:
-!text "ok", $00
+!pet "OK", $00
 
 installed_version_text:
-!text "  cONFIRMING VERSION... ", $00
+!pet "  Confirming version... ", $00
 
 warning_installed_prefix:
-!text "vERSION ", $00
+!pet "Version ", $00
 
 warning_installed_postfix:
-!text " CURRENTLY INSTALLED", $0d, $0d, $00
+!pet " currently installed", $0d, $0d, $00
 
 unstable_hint_text:
-!text "uNSTABLE VERSIONS CONTAIN EXPERIMENTAL", $0d
-!text "CODE AND MAY CAUSE EXISTING PROGRAMS TO", $0d
-!text "STOP WORKING. uSE AT YOUR OWN RISK.", $0d
-!text $0d, $00
+!pet "Unstable versions contain experimental", $0d
+!pet "code and may cause existing programs to", $0d
+!pet "stop working. Use at your own risk.", $0d
+!pet $0d, $00
 
 install_unstable_prompt:
-!text "iNSTALL UNSTABLE VERSION? (y/n)", $0d, $0d, $00
+!pet "Install unstable version? (Y/N)", $0d, $0d, $00
 
 reboot_request: !byte "R", $29, $00, $00
 
@@ -556,53 +556,53 @@ scan:
 ; ---------------------------------------------------------------------------
 
 legacy_firmware_error_text:
-!text "!! lEGACY FIRMWARE VERSION DETECTED !!", $0d, $0d, $00
+!pet "!! Legacy firmware version detected !!", $0d, $0d, $00
 
 legacy_firmware_help_text:
-!text "fIRMWARE VERSION 2.0.0 OR LATER IS", $0d
-!text "REQUIRED TO RUN THIS PROGRAM.", $0d
-!text $0d
-!text "tO UPDATE TO A NEWER VERSION, VISIT", $0d
-!text $0d
-!text $9f, "     WWW.WIC64.COM/WIC64-FLASHER", $1e, $0d
-!text $0d
-!text $00
+!pet "Firmware version 2.0.0 or later is", $0d
+!pet "required to run this program.", $0d
+!pet $0d
+!pet "To update to a newer version, visit", $0d
+!pet $0d
+!pet $9f, "     www.wic64.com/wic64-flasher", $1e, $0d
+!pet $0d
+!pet $00
 
 title_text:
-!text "fIRMWARE uPDATE", $0d, $0d, $00
+!pet "Firmware Update", $0d, $0d, $00
 
 installed_text:
-!text "iNSTALLED VERSION: ", $00
+!pet "Installed version: ", $00
 
 installed_tag:
-!text " <=", $00
+!pet " <=", $00
 
 current_stable_text:
-!text "1. cURRENT STABLE...... ", $00
+!pet "1. Current stable...... ", $00
 
 previous_stable_text:
-!text "2. pREVIOUS STABLE..... ", $00
+!pet "2. Previous stable..... ", $00
 
 current_unstable_text:
-!text "3. cURRENT UNSTABLE.... ", $00
+!pet "3. Current unstable.... ", $00
 
 previous_unstable_text:
-!text "4. pREVIOUS UNSTABLE... ", $00
+!pet "4. Previous unstable... ", $00
 
 stable_tag:
-!text " (STABLE)", $00
+!pet " (stable)", $00
 
 unstable_tag:
-!text " (UNSTABLE)", $00
+!pet " (unstable)", $00
 
-none_text: !text "NONE", $00
+none_text: !pet "none", $00
 
 prompt_text:
-!text "=> sELECT VERSION TO INSTALL", $0d
-!text $0d, $00
+!pet "=> Select version to install", $0d
+!pet $0d, $00
 
 timeout_error_text:
-!text "rEQUEST TIMEOUT", $0d, $0d, $00
+!pet "Request timeout", $0d, $0d, $00
 
 installed_version_request:
 !byte "R", $26, $00, $00
