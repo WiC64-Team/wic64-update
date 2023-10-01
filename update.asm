@@ -218,7 +218,6 @@ return_to_portal:
 .prepare_install_request
     +strlen install_request_url
     stx install_request_size
-    +add_four_to install_request_size
 
 .execute_install_request
     +print installing_text
