@@ -168,8 +168,7 @@ continue_or_quit_text:
 ; ---------------------------------------------------------------------------
 
 return_to_portal:
-    ; clear keyboard buffer
-    ; TODO: should be in portal startup
+    ; TODO: clearing the keyboard buffer should be in portal startup
     lda #$00
     sta $c6
 
@@ -180,6 +179,7 @@ return_to_portal:
     rts
 
 .portal_error_text: !pet $0d, "Could not return to portal:", $0d, $0d, $00
+
 ; ---------------------------------------------------------------------------
 
 !macro install .version, .query {
@@ -406,13 +406,14 @@ main:
 ++  jsr reverse_off
 
 bail_on_legacy_firmware:
-    +wic64_execute installed_version_string_request, installed_version_string_response
+    +wic64_detect
     bcc +
-    +print_error_and_jmp timeout_error_text, main
+    jsr red
+    +print device_not_present_error_text
+    jsr green
+    rts
 
-+   +strlen installed_version_string_response
-    cpx #$04
-    bne get_installed_version
++   bvc get_installed_version
 
     jsr red
     +print legacy_firmware_error_text
@@ -420,9 +421,7 @@ bail_on_legacy_firmware:
     jsr green
     +print legacy_firmware_help_text
 
-    +print continue_or_quit_text
-    jsr continue_or_quit
-    jmp main
+    rts
 
 get_installed_version:
     +wic64_execute installed_version_request, installed_version
@@ -593,7 +592,7 @@ scan:
 ; ---------------------------------------------------------------------------
 
 legacy_firmware_error_text:
-!pet "!! Legacy firmware version detected !!", $0d, $0d, $00
+!pet "Legacy firmware version detected", $0d, $0d, $00
 
 legacy_firmware_help_text:
 !pet "Firmware version 2.0.0 or later is", $0d
@@ -601,8 +600,7 @@ legacy_firmware_help_text:
 !pet $0d
 !pet "To update to a newer version, visit", $0d
 !pet $0d
-!pet $9f, "     www.wic64.com/wic64-flasher", $1e, $0d
-!pet $0d
+!pet $9f, "www.wic64.com/wic64-flasher", $1e, $0d
 !pet $00
 
 title_text:
@@ -637,6 +635,9 @@ none_text: !pet "none", $00
 prompt_text:
 !pet "=> Select version to install", $0d
 !pet $0d, $00
+
+device_not_present_error_text:
+!pet "WiC64 not present or does not respond", $0d, $00
 
 timeout_error_text:
 !pet "Request timed out", $0d, $0d, $00
