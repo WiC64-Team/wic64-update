@@ -12,7 +12,7 @@
 !byte $0c, $08, $0a, $00, $9e, $20, $32, $30, $36, $34, $00, $00, $00
 
 * = $0810
-jmp main
+jmp init
 
 ; ---------------------------------------------------------------------------
 
@@ -118,13 +118,6 @@ continue_or_quit:
 
 +   +rts_to main
 
-++  +scan key_stop
-    bne +
-    jmp ++
-
-+   jsr return_to_portal
-    jmp -
-
 ++  +scan key_esc
     bne +
     jmp ++
@@ -168,10 +161,6 @@ continue_or_quit_text:
 ; ---------------------------------------------------------------------------
 
 return_to_portal:
-    ; TODO: clearing the keyboard buffer should be in portal startup
-    lda #$00
-    sta $c6
-
     +wic64_return_to_portal
     jsr red
     +print .portal_error_text
@@ -384,14 +373,35 @@ reboot_request: !byte "R", $29, $00, $00
 
 ; ---------------------------------------------------------------------------
 
-main:
+init:
+    sei
+
+    ; mask nmi
+    lda #<nmi
+    sta $0318
+    lda #>nmi
+    sta $0319
+
+    ; no sysirq
+    lda #$7f
+    sta $dc0d
+    sta $dd0d
+
     lda #$00
     sta $d020
     sta $d021
 
+    jsr lowercase
+    jmp main
+
+nmi:
+    rti
+
+; ---------------------------------------------------------------------------
+
+main:
     jsr green
     jsr clrhome
-    jsr lowercase
 
     jsr test_menu_code_loaded
     bcc +
