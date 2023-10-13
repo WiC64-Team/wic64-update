@@ -132,21 +132,6 @@ continue_or_quit_text:
 
 ; ---------------------------------------------------------------------------
 
-!macro check_for_server_error {
-    clc
-    lda wic64_response_size+1
-    bne .done
-
-    lda #$02
-    cmp wic64_response_size
-    bcc .done
-
-    sec
-.done
-}
-
-; ---------------------------------------------------------------------------
-
 !macro print_error_and_jmp .message, .addr {
     jsr red
     +print .message
@@ -156,6 +141,27 @@ continue_or_quit_text:
     jsr continue_or_quit
 
     jmp .addr
+}
+
+; ---------------------------------------------------------------------------
+
+handle_server_error: !zone handle_server_error {
+    +wic64_execute .status_request, .status_response
+    bcc +
+
+    +print_error_and_jmp timeout_error_text, main
+
++   jsr red
+    +print .status_response
+    jsr green
+
+    +paragraph
+    +print continue_or_quit_text
+    jsr continue_or_quit
+    jmp main
+
+.status_request: !byte "R", $2a, $01, $00, $00
+.status_response: !fill 256, 0
 }
 
 ; ---------------------------------------------------------------------------
@@ -222,9 +228,8 @@ return_to_portal:
     +print_error_and_jmp timeout_error_text, main
 
 .check_for_server_error
-   +check_for_server_error
-    bcc .prepare_install_request
-    +print_error_and_jmp server_error_text, main
+    beq .prepare_install_request
+    jmp handle_server_error
 
 .prepare_install_request
     +strlen install_request_url
@@ -246,18 +251,9 @@ return_to_portal:
     +paragraph
     +print_error_and_jmp timeout_error_text, main
 
-+   jsr spinner_stop
-
-    lda #$00
-    sta install_successful
-
-+   lda install_response
-    cmp #'0'
-    beq +
-    lda #$01
-    sta install_successful
-
-+   lda install_successful
++   sta install_successful
+    jsr spinner_stop
+    lda install_successful
     beq .install_success
 
 .install_failure:
@@ -266,19 +262,13 @@ return_to_portal:
     jsr chrout
     jsr restore_cursor_pos
     +paragraph
-    +print_ascii install_response+2
-    jsr green
-
-    +paragraph
-    +print continue_or_quit_text
-    jsr continue_or_quit
-    jmp main
+    jmp handle_server_error
 
 .install_success:
     lda #$ba
     jsr chrout
     jsr restore_cursor_pos
-    +print_ascii install_response+2
+    +print ok_text
 
 .reboot:
     +newline
@@ -418,12 +408,13 @@ main:
 bail_on_legacy_firmware:
     +wic64_detect
     bcc +
+
     jsr red
     +print device_not_present_error_text
     jsr green
     rts
 
-+   bvc get_installed_version
++   beq get_installed_version
 
     jsr red
     +print legacy_firmware_error_text
@@ -468,9 +459,8 @@ get_current_stable_version:
     bcc +
     +print_error_and_jmp timeout_error_text, main
 
-+   +check_for_server_error
-    bcc +
-    +print_error_and_jmp server_error_text, main
++   beq +
+    jmp handle_server_error
 
 +   lda current_stable_version
     bne +
@@ -493,9 +483,8 @@ get_previous_stable_version:
     bcc +
     +print_error_and_jmp timeout_error_text, main
 
-+   +check_for_server_error
-    bcc +
-    +print_error_and_jmp server_error_text, main
++   beq +
+    jmp handle_server_error
 
 +   lda previous_stable_version
     bne +
@@ -521,9 +510,8 @@ get_current_unstable_version:
     bcc +
     +print_error_and_jmp timeout_error_text, main
 
-+   +check_for_server_error
-    bcc +
-    +print_error_and_jmp server_error_text, main
++   beq +
+    jmp handle_server_error
 
 +   lda current_unstable_version
     bne +
@@ -546,9 +534,8 @@ get_previous_unstable_version:
     bcc +
     +print_error_and_jmp timeout_error_text, main
 
-+   +check_for_server_error
-    bcc +
-    +print_error_and_jmp server_error_text, main
++   beq +
+    jmp handle_server_error
 
 +   lda previous_unstable_version
     bne +
