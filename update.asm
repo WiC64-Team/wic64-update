@@ -248,6 +248,10 @@ return_to_portal:
     bcc +
 
     jsr spinner_stop
+    jsr red
+    lda #'x'
+    jsr chrout
+    jsr restore_cursor_pos
     +paragraph
     +print_error_and_jmp timeout_error_text, main
 
@@ -296,7 +300,7 @@ return_to_portal:
     +print ok_text
 
     +newline
-    +print installed_version_text
+    +print confirming_version_text
 
     jsr save_cursor_pos
     jsr start_of_line
@@ -306,7 +310,11 @@ return_to_portal:
     bcc +
 
     jsr spinner_stop
-    +print_error_and_jmp timeout_error_text, main
+    jsr red
+    lda #'x'
+    jsr chrout
+    jsr restore_cursor_pos
+    +print_error_and_jmp short_timeout_error_text, main
 
 +   jsr spinner_stop
     lda #$ba
@@ -341,7 +349,7 @@ elipsis_text:
 ok_text:
 !pet "OK", $00
 
-installed_version_text:
+confirming_version_text:
 !pet "  Confirming version... ", $00
 
 warning_installed_prefix:
@@ -358,6 +366,9 @@ unstable_hint_text:
 
 install_unstable_prompt:
 !pet "Install unstable version? (Y/N)", $0d, $0d, $00
+
+short_timeout_error_text:
+!pet "Timed out", $0d, $0d, $00
 
 reboot_request: !byte "R", $29, $00, $00
 
