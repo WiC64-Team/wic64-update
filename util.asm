@@ -380,7 +380,29 @@ yellow:
 
 !zone spinner {
 .spinner_install:
-sei
+    jsr test_menu_code_loaded
+    bcc +
+
+    lda #<.spinner_sequence_cbm
+    sta .spinner_sequence_address
+    lda #>.spinner_sequence_cbm
+    sta .spinner_sequence_address+1
+    jmp ++
+
++   lda #<.spinner_sequence_wic
+    sta .spinner_sequence_address
+    lda #>.spinner_sequence_wic
+    sta .spinner_sequence_address+1
+
+++  ldx #$03
+-   lda $0000,x
+ .spinner_sequence_address = *-2
+    sta .spinner_sequence,x
+    dex
+    bpl -
+
+    sei
+
     ; stop all cia interrupts
     lda #$7f
     sta $dc0d
@@ -481,7 +503,9 @@ spinner_stop:
     rts
 
 .spinner_index: !byte $00
-.spinner_sequence: !byte $7b, $7e, $7c ,$6c
+.spinner_sequence_cbm: !byte $7b, $7e, $7c ,$6c
+.spinner_sequence_wic: !byte $6f, $70, $71, $72
+.spinner_sequence: !byte $00, $00, $00, $00
 .spinner_frames: !word $0000
 .previous_irq
 }
