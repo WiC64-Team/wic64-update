@@ -306,6 +306,7 @@ return_to_portal:
     jsr start_of_line
     jsr spinner_start
 
+    +wic64_set_timeout $02
     +wic64_execute installed_version_request, installed_version
     bcc +
 
