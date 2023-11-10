@@ -160,7 +160,7 @@ handle_server_error: !zone handle_server_error {
     jsr continue_or_quit
     jmp main
 
-.status_request: !byte "R", $2a, $01, $00, $00
+.status_request: !byte "R", WIC64_GET_STATUS_MESSAGE, $01, $00, $00
 .status_response: !fill 256, 0
 }
 
@@ -371,7 +371,7 @@ install_unstable_prompt:
 short_timeout_error_text:
 !pet "Timed out", $0d, $0d, $00
 
-reboot_request: !byte "R", $29, $00, $00
+reboot_request: !byte "R", WIC64_REBOOT, $00, $00
 
 ; ---------------------------------------------------------------------------
 
@@ -655,17 +655,17 @@ server_error_text:
 !pet "HTTP failed: no network or server error", $0d, $0d, $00
 
 installed_version_request:
-!byte "R", $26, $00, $00
+!byte "R", WIC64_GET_VERSION_NUMBERS, $00, $00
 
 installed_version_string_request:
-!byte "R", $00, $00, $00
+!byte "R", WIC64_GET_VERSION_STRING, $00, $00
 
 installed_version_string_response:
 !fill 64, 0
 
 remote_request:
 remote_request_header: !byte "R"
-remote_request_cmd: !byte $01
+remote_request_cmd: !byte WIC64_HTTP_GET
 remote_request_size: !byte <remote_request_length, >remote_request_length
 remote_request_url: !text "https://wic64.net/update/update.php?q="
 remote_request_query: !text "xxx"
@@ -703,7 +703,7 @@ previous_unstable_version_installed:
 
 install_request:
 install_request_header: !byte "R"
-install_request_cmd: !byte $27
+install_request_cmd: !byte WIC64_UPDATE_FIRMWARE
 install_request_size: !word $0000
 install_request_url: !fill 255
 
