@@ -285,13 +285,12 @@ return_to_portal:
 
     ; only send reboot request, then expect single handshake...
 
-    lda #$10
-    sta wic64_timeout
     +wic64_set_timeout $10
     +wic64_initialize
     +wic64_send_header reboot_request
     +wic64_wait_for_handshake
     +wic64_finalize
+    +wic64_set_timeout $02
 
     jsr spinner_stop
     lda #$ba
