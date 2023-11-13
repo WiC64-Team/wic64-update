@@ -6,6 +6,9 @@
 !addr draw_menu_header = $ce0c
 !addr menu_header_title = $cfa3
 
+!addr kernal_init_io = $fda3
+!addr kernal_reset_vectors = $ff8a
+
 ; ---------------------------------------------------------------------------
 
 * = $0801 ; 10 SYS 2064 ($0810)
@@ -400,6 +403,15 @@ nmi:
 
 ; ---------------------------------------------------------------------------
 
+exit:
+    sei
+    jsr kernal_init_io
+    jsr kernal_reset_vectors
+    cli
+    rts
+
+; ---------------------------------------------------------------------------
+
 main:
     jsr green
     jsr clrhome
@@ -416,16 +428,17 @@ main:
 
 ++  jsr reverse_off
 
-bail_on_legacy_firmware:
+exit_if_device_not_present:
     +wic64_detect
-    bcc +
+    bcc exit_if_legacy_firmware_detected
 
     jsr red
     +print device_not_present_error_text
     jsr green
-    rts
+    jmp exit
 
-+   beq get_installed_version
+exit_if_legacy_firmware_detected:
+    beq get_installed_version
 
     jsr red
     +print legacy_firmware_error_text
@@ -433,7 +446,7 @@ bail_on_legacy_firmware:
     jsr green
     +print legacy_firmware_help_text
 
-    rts
+    jmp exit
 
 get_installed_version:
     +wic64_execute installed_version_request, installed_version
@@ -645,7 +658,7 @@ prompt_text:
 !pet $0d, $00
 
 device_not_present_error_text:
-!pet "WiC64 not present or does not respond", $0d, $00
+!pet "WiC64 not present or unresponsive", $0d, $00
 
 timeout_error_text:
 !pet "Request timed out", $0d, $0d, $00
