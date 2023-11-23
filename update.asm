@@ -19,7 +19,7 @@ jmp init
 
 ; ---------------------------------------------------------------------------
 
-wic64_include_return_to_portal = 1
+wic64_include_enter_portal = 1
 !src "wic64.h"
 !src "wic64.asm"
 !src "util.asm"
@@ -125,7 +125,7 @@ continue_or_quit:
     bne +
     jmp ++
 
-+   jsr return_to_portal
++   jsr enter_portal
     jmp -
 
 ++  rts
@@ -169,8 +169,8 @@ handle_server_error: !zone handle_server_error {
 
 ; ---------------------------------------------------------------------------
 
-return_to_portal:
-    +wic64_return_to_portal
+enter_portal:
+    +wic64_enter_portal
     jsr red
     +print .portal_error_text
     +print_error_and_jmp server_error_text, main
