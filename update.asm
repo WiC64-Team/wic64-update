@@ -293,7 +293,7 @@ enter_portal:
     +wic64_send_header reboot_request
     +wic64_wait_for_handshake
     +wic64_finalize
-    +wic64_set_timeout $02
+    +wic64_set_timeout $04
 
     jsr spinner_stop
     lda #$ba
@@ -308,7 +308,7 @@ enter_portal:
     jsr start_of_line
     jsr spinner_start
 
-    +wic64_set_timeout $02
+    +wic64_set_timeout $04
     +wic64_execute installed_version_request, installed_version
     bcc +
 
@@ -416,6 +416,7 @@ main:
     jsr green
     jsr clrhome
 
+    +wic64_set_timeout $04
     jsr test_menu_code_loaded
     bcc +
 
