@@ -380,7 +380,7 @@ yellow:
 
 !zone spinner {
 .spinner_install:
-    jsr test_menu_code_loaded
+    jsr running_from_portal
     bcc +
 
     lda #<.spinner_sequence_cbm

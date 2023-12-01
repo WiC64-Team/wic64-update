@@ -26,25 +26,8 @@ wic64_include_enter_portal = 1
 
 ; ---------------------------------------------------------------------------
 
-test_menu_code_loaded: !zone {
-    lda draw_menu_header
-    cmp #$4c
-    bne .not_loaded
-
-    lda draw_menu_header+1
-    cmp #$46
-    bne .not_loaded
-
-    lda draw_menu_header+2
-    cmp #$ce
-    bne .not_loaded
-
-.loaded
-    clc
-    rts
-
-.not_loaded
-    sec
+running_from_portal: !zone {
+    !ifdef PORTAL_VERSION { clc } else { sec }
     rts
 }
 ; ---------------------------------------------------------------------------
@@ -417,7 +400,8 @@ main:
     jsr clrhome
 
     +wic64_set_timeout $04
-    jsr test_menu_code_loaded
+
+    jsr running_from_portal
     bcc +
 
     +print title_text
@@ -439,7 +423,7 @@ exit_if_device_not_present:
     jmp exit
 
 exit_if_legacy_firmware_detected:
-    beq get_installed_version
+    beq exit_if_emulated
 
     jsr red
     +print legacy_firmware_error_text
@@ -448,6 +432,14 @@ exit_if_legacy_firmware_detected:
     +print legacy_firmware_help_text
 
     jmp exit
+
+exit_if_emulated:
+    +wic64_execute hardware_request
+    bcc +
+    +print_error_and_jmp timeout_error_text, main
+
++   beq get_installed_version
+    +print_error_and_jmp update_impossible_error_text, enter_portal
 
 get_installed_version:
     +wic64_execute installed_version_request, installed_version
@@ -661,11 +653,17 @@ prompt_text:
 device_not_present_error_text:
 !pet "WiC64 not present or unresponsive", $0d, $00
 
+update_impossible_error_text:
+!pet "Update impossible: WiC64 is emulated", $0d, $0d, $00
+
 timeout_error_text:
 !pet "Request timed out", $0d, $0d, $00
 
 server_error_text:
 !pet "HTTP failed: no network or server error", $0d, $0d, $00
+
+hardware_request:
+!byte "R", WIC64_IS_HARDWARE, $00, $00
 
 installed_version_request:
 !byte "R", WIC64_GET_VERSION_NUMBERS, $00, $00
