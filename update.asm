@@ -114,7 +114,7 @@ continue_or_quit:
 ++  rts
 
 continue_or_quit_text:
-!pet "=> Press any key to continue", $0d, $00
+!pet "=> Press any key to continue, ", pet_backarrow, " to exit", $0d, $00
 
 ; ---------------------------------------------------------------------------
 
@@ -647,7 +647,7 @@ unstable_tag:
 none_text: !pet "none", $00
 
 prompt_text:
-!pet "=> Select version to install", $0d
+!pet "=> Select version to install, ", pet_backarrow, " to exit", $0d
 !pet $0d, $00
 
 device_not_present_error_text:

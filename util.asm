@@ -4,6 +4,12 @@
 current_line = $d1
 current_pos = $24
 
+!ifndef PORTAL_VERSION {
+    pet_backarrow = $5f
+} else {
+    pet_backarrow = $b5
+}
+
 !macro pointer .pointer, .address {
     ldx #<.address
     stx .pointer
