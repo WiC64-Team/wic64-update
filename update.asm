@@ -614,7 +614,7 @@ legacy_firmware_help_text:
 !pet $0d
 !pet "To update to a newer version, visit", $0d
 !pet $0d
-!pet $9f, "www.wic64.com/wic64-flasher", $1e, $0d
+!pet $9f, "https://www.wic64.com/flasher", $1e, $0d
 !pet $00
 
 title_text:
