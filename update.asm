@@ -9,6 +9,8 @@
 !addr kernal_init_io = $fda3
 !addr kernal_reset_vectors = $ff8a
 
+default_timeout = $08
+
 ; ---------------------------------------------------------------------------
 
 * = $0801 ; 10 SYS 2064 ($0810)
@@ -230,7 +232,7 @@ enter_portal:
     jsr start_of_line
     jsr spinner_start
 
-    +wic64_execute install_request, install_response, $40
+    +wic64_execute install_request, install_response, $80
     bcc +
 
     jsr spinner_stop
@@ -276,7 +278,7 @@ enter_portal:
     +wic64_send_header reboot_request
     +wic64_wait_for_handshake
     +wic64_finalize
-    +wic64_set_timeout $04
+    +wic64_set_timeout default_timeout
 
     jsr spinner_stop
     lda #$ba
@@ -291,7 +293,6 @@ enter_portal:
     jsr start_of_line
     jsr spinner_start
 
-    +wic64_set_timeout $04
     +wic64_execute installed_version_request, installed_version
     bcc +
 
@@ -399,7 +400,7 @@ main:
     jsr green
     jsr clrhome
 
-    +wic64_set_timeout $04
+    +wic64_set_timeout default_timeout
 
     jsr running_from_portal
     bcc +
